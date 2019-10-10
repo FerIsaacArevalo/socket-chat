@@ -16,7 +16,7 @@ IO.on('connection', (client) => {
         console.log('usuario desconectado');
         let us = usuario.borrarPersona(client.id) || 'usuario';
 
-        client.broadcast.to(us.sala).emit('salidaUsuarios', `${us.nombre} ha abandonado el chat`);
+        client.broadcast.to(us.sala).emit('salidaUsuarios', { usuario: 'Administrador', mensaje: `${us.nombre} salio` });
         client.broadcast.to(us.sala).emit('listaUsuarios', usuario.getPersonasPorSala(us.sala));
     })
 
@@ -24,14 +24,14 @@ IO.on('connection', (client) => {
     //Escuchando la variable que se emitio desde el cliente
     client.on('entrarSala', (data, callback) => {
 
-        if (data.usuario && data.sala) {
+        if (data.nombre && data.sala) {
 
             client.join(data.sala);
 
-            let personas = usuario.agregarPersona(client.id, data.usuario, data.sala);
+            let personas = usuario.agregarPersona(client.id, data.nombre, data.sala);
 
             callback(usuario.getPersonasPorSala(data.sala));
-            client.broadcast.to(data.sala).emit('ingresoUsuario', `Ingreso al chat: ${data.usuario}`);
+            client.broadcast.to(data.sala).emit('ingresoUsuario', usuario.getPersonasPorSala(data.sala));
             client.broadcast.to(data.sala).emit('listaUsuarios', usuario.getPersonasPorSala(data.sala));
         } else {
             callback({

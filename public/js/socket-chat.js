@@ -2,16 +2,20 @@ var socket = io();
 
 var params = new URLSearchParams(window.location.search);
 
-if (!params.has('usuario') || !params.has('sala')) {
+if (!params.has('nombre') || !params.has('sala')) {
 
     window.location.assign('index.html');
     throw new Error({
         Error: true,
-        mensaje: 'No se esta enviado el usuario/sala'
+        mensaje: 'No se esta enviado el nombre/sala'
     })
 }
 
-var usuario = params.get('usuario');
+//Parametros JQUERY esta en el js de jquery
+//var divUsuarios = $('#divUsuarios'); 
+
+
+var nombre = params.get('nombre');
 var sala = params.get('sala');
 
 //EL METODO ON es para escuchar algo (eventos, etc)
@@ -21,24 +25,26 @@ socket.on('connect', function() {
 
     //EL METODO EMIT ES PARA EMITIR ALGO
     socket.emit('entrarSala', {
-        usuario: usuario,
+        nombre: nombre,
         sala: sala
     }, function(resp) {
-        console.log(resp);
+        divUsuarios.html(renderizarUsuarios(resp)); //RenderizarUsuarios es una funcion declara en socket-chat-jquery.js
     })
 
 })
 
-socket.on('salidaUsuarios', function(resp) {
-    console.log(resp);
+socket.on('salidaUsuarios', function(mensaje) {
+    console.log(mensaje);
+
 })
 
 socket.on('listaUsuarios', function(resp) {
     console.log(resp);
 })
 
-socket.on('ingresoUsuario', function(resp) {
-    console.log(resp);
+socket.on('ingresoUsuario', function(mensaje) {
+    divUsuarios.html(renderizarUsuarios(mensaje)); //RenderizarUsuarios es una funcion declara en socket-chat-jquery.js
+    renderizarMensaje(mensaje, false);
 })
 
 //Configuracion para ver si perdimos conexión con el servidor (activo desactivo)
@@ -52,7 +58,9 @@ socket.on('disconnect', function() {
 //socket.emit('mensajePrivado', {mensaje: 'Hola a ANDREA', para: ''})
 
 socket.on('enviarMensaje', function(data) {
-    console.log(data);
+    //Funcion declarada en socket-chat-jquery.js
+    renderizarMensaje(data, false);
+    scrollBottom();
 })
 
 socket.on('mensajePrivado', function(data) {
